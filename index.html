@@ -1,0 +1,582 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset='utf-8' />
+    <title>Housing Discrimination</title>
+    <meta name='viewport' content='initial-scale=1,maximum-scale=1,user-scalable=no' />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,100..1000;1,9..40,100..1000&family=Russo+One&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Fjalla+One&display=swap" rel="stylesheet">
+    <!-- <link rel="icon" type="image/x-icon"
+        href="https://raw.githubusercontent.com/mapbox/assembly/publisher-staging/src/svgs/mapbox.svg"> -->
+    <script src='https://api.tiles.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.js'></script>
+    <link href='https://api.tiles.mapbox.com/mapbox-gl-js/v3.8.0/mapbox-gl.css' rel='stylesheet' />
+    <script src="https://cdn.jsdelivr.net/npm/mapbox-gl-globe-minimap@1.2.0/dist/bundle.js"></script>
+    <script src="https://unpkg.com/scrollama"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: "Russo One","Fjalla One", "DM Sans", sans-serif;
+            font-size: 20px;
+            text-rendering: optimizeLegibility;
+        }
+
+        .content {
+            max-width: 640px;
+            margin: auto;
+        }
+        
+        h1 {
+            font-family: "Fjalla One";
+            /* font-weight: bold; */
+            font-size: 3em;
+            line-height: 1.4;
+            }
+
+        p {
+            line-height: 1.6;
+            margin: 0;
+            padding-bottom: 1.2em;
+            font-family: "DM Sans";
+        }
+        .dark >p {
+            padding-bottom: 0px;
+        }
+        /* .dark-section {
+           background: #211951;
+           color: white;
+           position: relative;
+           z-index: 5;
+           padding: 5vh 10vw;
+        } */
+
+        #intro-section {
+            position: relative;
+            z-index: 5;
+            background-color: #211951;
+            color: white;
+            padding: 0vh 10vw;
+        }
+
+        .intro-container {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .intro-text {
+            flex: 1 1 50%;
+            padding-right: 20px;
+        }
+
+        .intro-text h1 {
+            font-size: 2.5em;
+            margin-bottom: 0.5em;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .intro-text-inner {
+        max-width: 70%;
+        margin: 0 auto;
+        }
+
+        .intro-text p {
+            font-size: 1.2em;
+        }
+
+        .intro-image {
+            flex: 1 1 50%;
+            text-align: center;
+        }
+
+        .intro-image img {
+            width: 70%;
+            height: auto;
+        }
+        
+        #narrative-section {
+            position: relative;
+            z-index: 5;
+            background-color: #211951;
+            color: white;
+            padding: 5vh 10vw;
+            font-size: 1.1em;
+            line-height: 1.6em;
+        }
+
+        .narrative-inner {
+            width: 70%;
+            margin: 0 auto;
+        }
+
+        #concluding-section {
+            position: relative;
+            z-index: 5;
+            background-color: #211951;
+            color: white;
+            padding: 5vh 10vw;
+            font-size: 1.1em;
+            line-height: 1.6em;
+        }
+
+        #ending {
+            position: relative;
+            z-index: 5;
+            background-color: #211951;
+            color: white;
+            padding: 5vh 10vw;
+            font-size: 1.1em;
+            line-height: 1.6em;
+        }
+
+        a,
+        a:hover,
+        a:visited {
+            color: #836FFF;
+        }
+
+        #map {
+            top: 0;
+            height: 100vh;
+            width: 100vw;
+            position: fixed;
+            z-index: 0;
+        }
+
+        #header {
+            margin: auto;
+            width: 100%;
+            position: relative;
+            z-index: 5;
+        }
+
+        #header h1,
+        #header h2,
+        #header p {
+            margin: 0;
+            padding: 2vh 2vw;
+            text-align: center;
+        }
+
+        #footer {
+            width: 100%;
+            min-height: 5vh;
+            padding-top: 2vh;
+            padding-bottom: 2vh;
+            text-align: center;
+            line-height: 25px;
+            font-size: 13px;
+            position: relative;
+            z-index: 5;
+        }
+
+        #features {
+            padding-top: 10vh;
+            padding-bottom: 10vh;
+        }
+
+        .hidden {
+            visibility: hidden;
+        }
+
+        .centered {
+            width: 50vw;
+            margin: 0 auto;
+        }
+
+        .lefty {
+            width: 33vw;
+            margin-left: 5vw;
+        }
+
+        .righty {
+            width: 33vw;
+            margin-left: 62vw;
+        }
+
+        .fully {
+            width: 100%;
+            margin: auto;
+        }
+
+        .light {
+            color: #444;
+            background-color: #fafafa;
+        }
+
+        .dark {
+            color: #fafafa;
+            background-color: #211951;
+        }
+
+        .step {
+            padding-bottom: 50vh;
+            /* margin-bottom: 10vh; */
+            opacity: 0.25;
+        }
+
+        .step.active {
+            opacity: 0.9;
+        }
+
+        .step div {
+            padding: 25px 50px;
+            line-height: 25px;
+            font-size: 19px;
+        }
+
+        .step img {
+            width: 100%;
+        }
+
+        @media (max-width: 750px) {
+
+            .centered,
+            .lefty,
+            .righty,
+            .fully {
+                width: 90vw;
+                margin: 0 auto;
+            }
+        }
+
+        /* Fix issue on mobile browser where scroll breaks  */
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan,
+        .mapboxgl-canvas-container.mapboxgl-touch-zoom-rotate.mapboxgl-touch-drag-pan .mapboxgl-canvas {
+            touch-action: unset;
+        }
+    </style>
+
+    <link href="scrolly-styles.css" rel="stylesheet">
+    <script src="https://unpkg.com/intersection-observer@0.5.1/intersection-observer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/scrollama/3.2.0/scrollama.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/scrolly-video@latest/dist/scrolly-video.js"></script>
+</head>
+
+<body>
+    <section id="intro-section">
+    <div class="intro-container">
+        
+        <div class="intro-text">
+            <div class="intro-text-inner">
+               <h1>Not rent, but your identity could be the dealbreaker while house-hunting in India</h1>
+            </div>
+        </div>
+
+        <div class="intro-image">
+        <img src="coverimage.gif" alt="Cover Image">
+        </div>
+
+    </div>
+    </section>
+
+    <section id="narrative-section">
+        <div class="narrative-text">
+            <div class="narrative-inner">
+                <p><i>By Naman Shah</i></p>
+                <p>“What is your full name?”, asked the houseowner when I enquired details of the property she had put out for rent. It is common to ask the last name for determining the caste or religion of a person. More so, in the house-renting process.</p>
+                <p>In search of a new place, I was checking the houses in my neighbourhood	 which advertised ‘TO LET’ banners on their doors. Many houses had additional text on their banners – ‘ONLY FOR FAMILY’. As a single man, I had less options.</p>
+                <p>This was four years ago, when I walked around the nearby blocks in search of a house. If I were to find a house today, what would the situation be? Let’s understand it by a map.</p>
+            </div>
+        </div>
+    </section>
+  
+    <div id="map"></div>
+    <div id="story"></div>
+    
+    <section id="concluding-section">
+        <div class="narrative-text">
+            <div class="narrative-inner">
+                <p>But are they really?</p>
+                <p>I classified the filters of marital status and food habits because they were specified on the housing website. In reality, there are other discriminatory filters, too. They become apparent only when one actually speaks to the houseowner.</p>
+            </div>
+        </div>
+    </section>
+    <section id="scrolly-video" class="scrolly-container">
+    <div class="sticky-thing">
+    </div>
+    <div class="steps-container">
+      <div class="step" id="step-first">
+        <p>They could be based on your <a href="https://www.article-14.com/post/bigotry-at-home-how-delhi-mumbai-keep-muslim-tenants-out">religion</a></p>
+      </div>
+      <div class="step" id="step-second">
+        <p>your <a href="https://www.livemint.com/money/personal-finance/indian-rental-market-excludes-lgbtq-couples-shows-mint-analysis-of-99acres-listings-legal-recognition-of-same-sex-marriages-may-improve-situation-11682013970518.html">sexuality</a></p>
+      </div>
+      <div class="step" id="step-third">
+        <p>your <a href="https://theprint.in/pageturner/excerpt/people-were-keen-to-give-me-a-house-on-rent-till-they-learned-about-my-dalit-identity/1858608/">caste</a></p>
+      </div>
+      <div class="step" id="step-fourth">
+        <p>or even your <a href="https://theworld.org/stories/2017/09/12/if-you-re-single-lawyer-or-muslim-delhi-s-apartments-aren-t-you">profession.</a></p>
+      </div>
+      <!-- <div class="step" id="step-fifth">
+        <p>Step five.</p>
+      </div> -->
+    </div>
+    </section>
+    <section id="ending">
+        <div class="narrative-text">
+            <div class="narrative-inner">
+                <p>You may find the methodology and repository of this project here.</p>
+            </div>
+        </div>
+    </section>
+    
+    <script>
+    new ScrollyVideo({
+      scrollyVideoContainer: document.querySelector("#scrolly-video .sticky-thing"),
+      src: "video.mp4",
+      full: true,
+      // cover: true
+    });
+  </script>
+  <style>
+    .step {
+      height: 100vh;
+      margin-bottom: 0;
+    }
+
+    /* .sticky-thing > canvas {
+      object-fit: cover;
+    } */
+  </style>
+
+    <script src="./config.js"></script>
+    <script>
+        var initLoad = true;
+        var layerTypes = {
+            'fill': ['fill-opacity'],
+            'line': ['line-opacity'],
+            'circle': ['circle-opacity', 'circle-stroke-opacity'],
+            'symbol': ['icon-opacity', 'text-opacity'],
+            'raster': ['raster-opacity'],
+            'fill-extrusion': ['fill-extrusion-opacity'],
+            'heatmap': ['heatmap-opacity']
+        }
+
+        var alignments = {
+            'left': 'lefty',
+            'center': 'centered',
+            'right': 'righty',
+            'full': 'fully'
+        }
+
+        function getLayerPaintType(layer) {
+            var layerType = map.getLayer(layer).type;
+            return layerTypes[layerType];
+        }
+
+        function setLayerOpacity(layer) {
+            var paintProps = getLayerPaintType(layer.layer);
+            paintProps.forEach(function (prop) {
+                var options = {};
+                if (layer.duration) {
+                    var transitionProp = prop + "-transition";
+                    options = { "duration": layer.duration };
+                    map.setPaintProperty(layer.layer, transitionProp, options);
+                }
+                map.setPaintProperty(layer.layer, prop, layer.opacity, options);
+            });
+        }
+
+        var story = document.getElementById('story');
+        var features = document.createElement('div');
+        features.setAttribute('id', 'features');
+
+        var header = document.createElement('div');
+
+        if (config.title) {
+            var titleText = document.createElement('h1');
+            titleText.innerText = config.title;
+            header.appendChild(titleText);
+        }
+
+        if (config.subtitle) {
+            var subtitleText = document.createElement('h2');
+            subtitleText.innerText = config.subtitle;
+            header.appendChild(subtitleText);
+        }
+
+        if (config.byline) {
+            var bylineText = document.createElement('p');
+            bylineText.innerText = config.byline;
+            header.appendChild(bylineText);
+        }
+
+        if (header.innerText.length > 0) {
+            header.classList.add(config.theme);
+            header.setAttribute('id', 'header');
+            story.appendChild(header);
+        }
+
+        config.chapters.forEach((record, idx) => {
+            var container = document.createElement('div');
+            var chapter = document.createElement('div');
+
+            if (record.title) {
+                var title = document.createElement('h3');
+                title.innerText = record.title;
+                chapter.appendChild(title);
+            }
+
+            if (record.image) {
+                var image = new Image();
+                image.src = record.image;
+                chapter.appendChild(image);
+            }
+
+            if (record.description) {
+                var story = document.createElement('p');
+                story.innerHTML = record.description;
+                chapter.appendChild(story);
+            }
+
+            container.setAttribute('id', record.id);
+            container.classList.add('step');
+            if (idx === 0) {
+                container.classList.add('active');
+            }
+
+            chapter.classList.add(config.theme);
+            container.appendChild(chapter);
+            container.classList.add(alignments[record.alignment] || 'centered');
+            if (record.hidden) {
+                container.classList.add('hidden');
+            }
+            features.appendChild(container);
+        });
+
+        story.appendChild(features);
+
+        var footer = document.createElement('div');
+
+        if (config.footer) {
+            var footerText = document.createElement('p');
+            footerText.innerHTML = config.footer;
+            footer.appendChild(footerText);
+        }
+
+        if (footer.innerText.length > 0) {
+            footer.classList.add(config.theme);
+            footer.setAttribute('id', 'footer');
+            story.appendChild(footer);
+        }
+
+        mapboxgl.accessToken = config.accessToken;
+
+        var map = new mapboxgl.Map({
+            container: 'map',
+            style: config.style,
+            center: config.chapters[0].location.center,
+            zoom: config.chapters[0].location.zoom,
+            bearing: config.chapters[0].location.bearing,
+            pitch: config.chapters[0].location.pitch,
+            interactive: false,
+            projection: config.projection
+        });
+
+        // Create a inset map if enabled in config.js
+        if (config.inset) {
+            map.addControl(
+                new GlobeMinimap({ ...config.insetOptions }),
+                config.insetPosition
+            );
+        }
+
+        if (config.showMarkers) {
+            var marker = new mapboxgl.Marker({ color: config.markerColor });
+            marker.setLngLat(config.chapters[0].location.center).addTo(map);
+        }
+
+        // instantiate the scrollama
+        var scroller = scrollama();
+
+
+        map.on("load", function () {
+            if (config.use3dTerrain) {
+                map.addSource('mapbox-dem', {
+                    'type': 'raster-dem',
+                    'url': 'mapbox://mapbox.mapbox-terrain-dem-v1',
+                    'tileSize': 512,
+                    'maxzoom': 14
+                });
+                // add the DEM source as a terrain layer with exaggerated height
+                map.setTerrain({ 'source': 'mapbox-dem', 'exaggeration': 1.5 });
+
+                // add a sky layer that will show when the map is highly pitched
+                map.addLayer({
+                    'id': 'sky',
+                    'type': 'sky',
+                    'paint': {
+                        'sky-type': 'atmosphere',
+                        'sky-atmosphere-sun': [0.0, 0.0],
+                        'sky-atmosphere-sun-intensity': 15
+                    }
+                });
+            };
+
+            // setup the instance, pass callback functions
+            scroller
+                .setup({
+                    step: '.step',
+                    offset: 0.5,
+                    progress: true
+                })
+                .onStepEnter(async response => {
+                    var current_chapter = config.chapters.findIndex(chap => chap.id === response.element.id);
+                    var chapter = config.chapters[current_chapter];
+
+                    response.element.classList.add('active');
+                    map[chapter.mapAnimation || 'flyTo'](chapter.location);
+
+                    if (config.showMarkers) {
+                        marker.setLngLat(chapter.location.center);
+                    }
+                    if (chapter.onChapterEnter.length > 0) {
+                        chapter.onChapterEnter.forEach(setLayerOpacity);
+                    }
+                    if (chapter.callback) {
+                        window[chapter.callback]();
+                    }
+                    if (chapter.rotateAnimation) {
+                        map.once('moveend', () => {
+                            const rotateNumber = map.getBearing();
+                            map.rotateTo(rotateNumber + 180, {
+                                duration: 30000, easing: function (t) {
+                                    return t;
+                                }
+                            });
+                        });
+                    }
+                    if (config.auto) {
+                        var next_chapter = (current_chapter + 1) % config.chapters.length;
+                        map.once('moveend', () => {
+                            document.querySelectorAll('[data-scrollama-index="' + next_chapter.toString() + '"]')[0].scrollIntoView();
+                        });
+                    }
+                })
+                .onStepExit(response => {
+                    var chapter = config.chapters.find(chap => chap.id === response.element.id);
+                    response.element.classList.remove('active');
+                    if (chapter.onChapterExit.length > 0) {
+                        chapter.onChapterExit.forEach(setLayerOpacity);
+                    }
+                });
+
+
+            if (config.auto) {
+                document.querySelectorAll('[data-scrollama-index="0"]')[0].scrollIntoView();
+            }
+        });    
+
+    </script>
+
+</body>
+
+</html>
